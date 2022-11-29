@@ -1,0 +1,30 @@
+import json
+import boto3
+import csv
+import io
+
+s3client = boto3.client('s3')
+def lambda_handler(event,context):
+    try: 
+        print(event)
+        body = event['Records'][0]['body']
+        bodyjson = json.loads(body)
+        bucket = bodyjson['Records'][0]['s3']['bucket']['name']
+        print(bucket)
+        #[0]['body']['Bucket']
+        key = bodyjson['Records'][0]['s3']['object']['key']
+        message = 'new file uploaded this bucket' + bucket
+        print(bucket)
+        print(key)
+
+        #print(message)
+        response = s3client.get_object(Bucket=bucket,Key=key)
+        data = response['Body'].read().decode('utf-8')
+        reader = csv.reader(io.StringIO(data))
+        next(reader)
+        for row in reader:
+            print(str.format("Serial Number-{}, Company Name-{}, Employee Markme-{}, Description-{}, Leave-{}",row[0],row[1],row[2],row[3],row[4]))
+            
+    except Exception as e:
+        print(e)
+        # TODO: write code... 
